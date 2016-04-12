@@ -6,10 +6,11 @@ import time
 from gensim.models import Word2Vec
 from keras.callbacks import Callback, ModelCheckpoint
 
-from config import LOG_FOLDER, NO_OF_LABELS
+from config import LOG_FOLDER, NO_OF_LABELS, KEYWORD_WORD2VEC, KEYWORD_SCALER, \
+    CATEGORY_WORD2VEC, CATEGORY_SCALER
 from labels import get_labels
 from magpie import MagpieModel
-from magpie.config import NB_EPOCHS, BATCH_SIZE, WORD2VEC_MODELPATH, SCALER_PATH
+from magpie.config import NB_EPOCHS, BATCH_SIZE
 from magpie.evaluation.rank_metrics import mean_reciprocal_rank, r_precision, \
     mean_average_precision, ndcg_at_k, precision_at_k
 from magpie.utils import load_from_disk
@@ -17,9 +18,18 @@ from magpie.utils import load_from_disk
 
 def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
                 batch_size=BATCH_SIZE, verbose=1):
+
+    # Figure out whether we're predicting categories or keywords
+    if NO_OF_LABELS == 14:
+        scaler_path = CATEGORY_SCALER
+        w2v_path = CATEGORY_WORD2VEC
+    else:
+        scaler_path = KEYWORD_SCALER
+        w2v_path = KEYWORD_WORD2VEC
+
     model = MagpieModel(
-        word2vec_model=Word2Vec.load(WORD2VEC_MODELPATH),
-        scaler=load_from_disk(SCALER_PATH),
+        word2vec_model=Word2Vec.load(w2v_path),
+        scaler=load_from_disk(scaler_path),
     )
 
     logger = CustomLogger(nn)
@@ -46,9 +56,17 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 
 def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
           batch_size=BATCH_SIZE, verbose=1):
+    # Figure out whether we're predicting categories or keywords
+    if NO_OF_LABELS == 14:
+        scaler_path = CATEGORY_SCALER
+        w2v_path = CATEGORY_WORD2VEC
+    else:
+        scaler_path = KEYWORD_SCALER
+        w2v_path = KEYWORD_WORD2VEC
+
     model = MagpieModel(
-        word2vec_model=WORD2VEC_MODELPATH,
-        scaler=SCALER_PATH,
+        word2vec_model=Word2Vec.load(w2v_path),
+        scaler=load_from_disk(scaler_path),
     )
 
     logger = CustomLogger(nn)
