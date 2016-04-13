@@ -6,9 +6,9 @@ import time
 from gensim.models import Word2Vec
 from keras.callbacks import Callback, ModelCheckpoint
 
-from config import LOG_FOLDER, NO_OF_LABELS, KEYWORD_WORD2VEC, KEYWORD_SCALER, \
+from inspire_magpie.config import LOG_FOLDER, NO_OF_LABELS, KEYWORD_WORD2VEC, KEYWORD_SCALER, \
     CATEGORY_WORD2VEC, CATEGORY_SCALER
-from labels import get_labels
+from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
 from magpie.config import NB_EPOCHS, BATCH_SIZE
 from magpie.evaluation.rank_metrics import mean_reciprocal_rank, r_precision, \

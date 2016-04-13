@@ -28,7 +28,7 @@ setup(
     # long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/jstypka/inspire-magpie',
+    url='https://github.com/inspirehep/inspire-magpie',
 
     # Author details
     author='Jan Stypka',

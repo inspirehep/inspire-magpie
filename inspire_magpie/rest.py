@@ -4,8 +4,8 @@ import time
 from flask import Flask, request, jsonify
 from gensim.models import Word2Vec
 
-from config import DATA_DIR
-from labels import get_labels
+from inspire_magpie.config import DATA_DIR
+from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
 from magpie.nn.models import berger_cnn
 from magpie.utils import load_from_disk
