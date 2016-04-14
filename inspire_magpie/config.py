@@ -10,7 +10,7 @@ KEYWORD_SCALER = os.path.join(DATA_DIR, 'keywords', 'scaler100.pickle')
 CATEGORY_WORD2VEC = os.path.join(DATA_DIR, 'categories', 'word2vec100.gensim')
 CATEGORY_SCALER = os.path.join(DATA_DIR, 'categories', 'scaler100.pickle')
 
-EXPERIMENT_WORD2VEC = os.path.join(DATA_DIR, 'experiment', 'word2vec100.gensim')
-EXPERIMENT_SCALER = os.path.join(DATA_DIR, 'experiment', 'scaler100.pickle')
+EXPERIMENT_WORD2VEC = os.path.join(DATA_DIR, 'experiments', 'word2vec100.gensim')
+EXPERIMENT_SCALER = os.path.join(DATA_DIR, 'experiments', 'scaler100.pickle')
 
 NO_OF_LABELS = 10000
