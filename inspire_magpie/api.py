@@ -7,7 +7,7 @@ from gensim.models import Word2Vec
 from keras.callbacks import Callback, ModelCheckpoint
 
 from inspire_magpie.config import LOG_FOLDER, NO_OF_LABELS, KEYWORD_WORD2VEC, KEYWORD_SCALER, \
-    CATEGORY_WORD2VEC, CATEGORY_SCALER
+    CATEGORY_WORD2VEC, CATEGORY_SCALER, EXPERIMENT_WORD2VEC, EXPERIMENT_SCALER
 from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
 from magpie.config import NB_EPOCHS, BATCH_SIZE
@@ -23,6 +23,9 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
     if NO_OF_LABELS == 14:
         scaler_path = CATEGORY_SCALER
         w2v_path = CATEGORY_WORD2VEC
+    elif NO_OF_LABELS == 500:
+        scaler_path = EXPERIMENT_SCALER
+        w2v_path = EXPERIMENT_WORD2VEC
     else:
         scaler_path = KEYWORD_SCALER
         w2v_path = KEYWORD_WORD2VEC
@@ -60,6 +63,9 @@ def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
     if NO_OF_LABELS == 14:
         scaler_path = CATEGORY_SCALER
         w2v_path = CATEGORY_WORD2VEC
+    elif NO_OF_LABELS == 500:
+        scaler_path = EXPERIMENT_SCALER
+        w2v_path = EXPERIMENT_WORD2VEC
     else:
         scaler_path = KEYWORD_SCALER
         w2v_path = KEYWORD_WORD2VEC
