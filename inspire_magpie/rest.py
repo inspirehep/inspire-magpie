@@ -4,8 +4,7 @@ import time
 from flask import Flask, request, jsonify
 from gensim.models import Word2Vec
 
-from inspire_magpie.config import DATA_DIR, KEYWORD_SCALER, KEYWORD_WORD2VEC, \
-    CATEGORY_SCALER, CATEGORY_WORD2VEC, EXPERIMENT_SCALER, EXPERIMENT_WORD2VEC
+from inspire_magpie.config import DATA_DIR, WORD2VEC_PATH, SCALER_PATH
 from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
 from magpie.nn.models import berger_cnn
@@ -32,24 +31,18 @@ def build_model_for_corpus(corpus):
     """ Build an appropriate Keras NN model depending on the corpus """
     if corpus == 'keywords':
         keras_model = berger_cnn(embedding_size=100, output_length=10000)
-        w2v_path = KEYWORD_WORD2VEC
-        scaler_path = KEYWORD_SCALER
     elif corpus == 'categories':
-        keras_model = berger_cnn(embedding_size=50, output_length=14)
-        w2v_path = CATEGORY_WORD2VEC
-        scaler_path = CATEGORY_SCALER
+        keras_model = berger_cnn(embedding_size=100, output_length=14)
     elif corpus == 'experiments':
         keras_model = berger_cnn(embedding_size=100, output_length=500)
-        w2v_path = EXPERIMENT_WORD2VEC
-        scaler_path = EXPERIMENT_SCALER
     else:
         raise ValueError('The corpus is not valid')
 
     model_path = os.path.join(DATA_DIR, corpus, 'model.pickle')
     keras_model.load_weights(model_path)
 
-    w2v_model = Word2Vec.load(w2v_path)
-    scaler = load_from_disk(scaler_path)
+    w2v_model = Word2Vec.load(WORD2VEC_PATH)
+    scaler = load_from_disk(SCALER_PATH)
     labels = get_labels(keras_model.output_shape[1])
 
     model = MagpieModel(

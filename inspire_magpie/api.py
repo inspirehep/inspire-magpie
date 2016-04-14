@@ -6,8 +6,7 @@ import time
 from gensim.models import Word2Vec
 from keras.callbacks import Callback, ModelCheckpoint
 
-from inspire_magpie.config import LOG_FOLDER, NO_OF_LABELS, KEYWORD_WORD2VEC, KEYWORD_SCALER, \
-    CATEGORY_WORD2VEC, CATEGORY_SCALER, EXPERIMENT_WORD2VEC, EXPERIMENT_SCALER
+from inspire_magpie.config import LOG_FOLDER, NO_OF_LABELS, WORD2VEC_PATH, SCALER_PATH
 from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
 from magpie.config import NB_EPOCHS, BATCH_SIZE
@@ -19,21 +18,9 @@ from magpie.utils import load_from_disk
 def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
                 batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
                 verbose=1):
-
-    # Figure out whether we're predicting categories or keywords
-    if no_of_labels == 14:
-        scaler_path = CATEGORY_SCALER
-        w2v_path = CATEGORY_WORD2VEC
-    elif no_of_labels == 500:
-        scaler_path = EXPERIMENT_SCALER
-        w2v_path = EXPERIMENT_WORD2VEC
-    else:
-        scaler_path = KEYWORD_SCALER
-        w2v_path = KEYWORD_WORD2VEC
-
     model = MagpieModel(
-        word2vec_model=Word2Vec.load(w2v_path),
-        scaler=load_from_disk(scaler_path),
+        word2vec_model=Word2Vec.load(WORD2VEC_PATH),
+        scaler=load_from_disk(SCALER_PATH),
     )
 
     logger = CustomLogger(nn)
@@ -61,20 +48,9 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
           batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
           verbose=1):
-    # Figure out whether we're predicting categories or keywords
-    if no_of_labels == 14:
-        scaler_path = CATEGORY_SCALER
-        w2v_path = CATEGORY_WORD2VEC
-    elif no_of_labels == 500:
-        scaler_path = EXPERIMENT_SCALER
-        w2v_path = EXPERIMENT_WORD2VEC
-    else:
-        scaler_path = KEYWORD_SCALER
-        w2v_path = KEYWORD_WORD2VEC
-
     model = MagpieModel(
-        word2vec_model=Word2Vec.load(w2v_path),
-        scaler=load_from_disk(scaler_path),
+        word2vec_model=Word2Vec.load(WORD2VEC_PATH),
+        scaler=load_from_disk(SCALER_PATH),
     )
 
     logger = CustomLogger(nn)
