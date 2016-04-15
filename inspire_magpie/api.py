@@ -17,7 +17,7 @@ from magpie.utils import load_from_disk
 
 
 def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
-                batch_size=BATCH_SIZE, verbose=1):
+                batch_size=BATCH_SIZE, persist=False, verbose=1):
 
     # Figure out whether we're predicting categories or keywords
     if NO_OF_LABELS == 14:
@@ -52,13 +52,13 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
         verbose=verbose,
     )
 
-    finish_logging(logger, history)
+    finish_logging(logger, history, model.keras_model, persist=persist)
 
     return history, model
 
 
 def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
-          batch_size=BATCH_SIZE, verbose=1):
+          batch_size=BATCH_SIZE, persist=False, verbose=1):
     # Figure out whether we're predicting categories or keywords
     if NO_OF_LABELS == 14:
         scaler_path = CATEGORY_SCALER
@@ -92,12 +92,12 @@ def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
         verbose=verbose,
     )
 
-    finish_logging(logger, history)
+    finish_logging(logger, history, model.keras_model, persist=persist)
 
     return history, model
 
 
-def finish_logging(logger, history):
+def finish_logging(logger, history, keras_model, persist=False):
     """ Save the rest of the logs after finishing optimisation. """
     history.history['map'] = logger.map_list
     history.history['ndcg'] = logger.ndcg_list
@@ -105,6 +105,9 @@ def finish_logging(logger, history):
     history.history['r_prec'] = logger.r_prec_list
     history.history['precision@3'] = logger.p_at_3_list
     history.history['precision@5'] = logger.p_at_5_list
+
+    if persist:
+        keras_model.save_weights(os.path.join(logger.log_dir, 'final_model'))
 
     # Write acc and loss to file
     for metric in ['acc', 'loss']:
