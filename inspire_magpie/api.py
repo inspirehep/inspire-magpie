@@ -17,13 +17,14 @@ from magpie.utils import load_from_disk
 
 
 def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
-                batch_size=BATCH_SIZE, persist=False, verbose=1):
+                batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
+                verbose=1):
 
     # Figure out whether we're predicting categories or keywords
-    if NO_OF_LABELS == 14:
+    if no_of_labels == 14:
         scaler_path = CATEGORY_SCALER
         w2v_path = CATEGORY_WORD2VEC
-    elif NO_OF_LABELS == 500:
+    elif no_of_labels == 500:
         scaler_path = EXPERIMENT_SCALER
         w2v_path = EXPERIMENT_WORD2VEC
     else:
@@ -43,7 +44,7 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 
     history = model.batch_train(
         train_dir,
-        get_labels(NO_OF_LABELS),
+        get_labels(no_of_labels),
         test_dir=test_dir,
         nn_model=nn,
         callbacks=[logger, model_checkpoint],
@@ -58,12 +59,13 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 
 
 def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
-          batch_size=BATCH_SIZE, persist=False, verbose=1):
+          batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
+          verbose=1):
     # Figure out whether we're predicting categories or keywords
-    if NO_OF_LABELS == 14:
+    if no_of_labels == 14:
         scaler_path = CATEGORY_SCALER
         w2v_path = CATEGORY_WORD2VEC
-    elif NO_OF_LABELS == 500:
+    elif no_of_labels == 500:
         scaler_path = EXPERIMENT_SCALER
         w2v_path = EXPERIMENT_WORD2VEC
     else:
@@ -83,7 +85,7 @@ def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 
     history = model.train(
         train_dir,
-        get_labels(NO_OF_LABELS),
+        get_labels(no_of_labels),
         test_dir=test_dir,
         nn_model=nn,
         callbacks=[logger, model_checkpoint],
