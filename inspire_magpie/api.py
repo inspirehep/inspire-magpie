@@ -13,13 +13,16 @@ from magpie import MagpieModel
 from magpie.config import NB_EPOCHS, BATCH_SIZE
 from magpie.evaluation.rank_metrics import mean_reciprocal_rank, r_precision, \
     mean_average_precision, ndcg_at_k, precision_at_k
+from magpie.evaluation.standard_evaluation import ancestor_pr_auc, \
+    descendant_pr_auc
+from magpie.linear_classifier.utils import get_ontology
 from magpie.utils import load_from_disk
 
 
 def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
                 batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
                 verbose=1):
-
+    ontology = None
     # Figure out whether we're predicting categories or keywords
     if no_of_labels == 14:
         scaler_path = CATEGORY_SCALER
@@ -30,13 +33,16 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
     else:
         scaler_path = KEYWORD_SCALER
         w2v_path = KEYWORD_WORD2VEC
+        ontology = get_ontology()
+
+    labels = get_labels(no_of_labels)
 
     model = MagpieModel(
         word2vec_model=Word2Vec.load(w2v_path),
         scaler=load_from_disk(scaler_path),
     )
 
-    logger = CustomLogger(nn)
+    logger = CustomLogger(nn, labels, ontology)
     model_checkpoint = ModelCheckpoint(
         os.path.join(logger.log_dir, 'keras_model'),
         save_best_only=True,
@@ -44,7 +50,7 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 
     history = model.batch_train(
         train_dir,
-        get_labels(no_of_labels),
+        labels,
         test_dir=test_dir,
         nn_model=nn,
         callbacks=[logger, model_checkpoint],
@@ -61,6 +67,7 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
           batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
           verbose=1):
+    ontology = None
     # Figure out whether we're predicting categories or keywords
     if no_of_labels == 14:
         scaler_path = CATEGORY_SCALER
@@ -71,13 +78,16 @@ def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
     else:
         scaler_path = KEYWORD_SCALER
         w2v_path = KEYWORD_WORD2VEC
+        ontology = get_ontology()
+
+    labels = get_labels(no_of_labels)
 
     model = MagpieModel(
         word2vec_model=Word2Vec.load(w2v_path),
         scaler=load_from_disk(scaler_path),
     )
 
-    logger = CustomLogger(nn)
+    logger = CustomLogger(nn, labels, ontology)
     model_checkpoint = ModelCheckpoint(
         os.path.join(logger.log_dir, 'keras_model'),
         save_best_only=True,
@@ -85,7 +95,7 @@ def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
 
     history = model.train(
         train_dir,
-        get_labels(no_of_labels),
+        labels,
         test_dir=test_dir,
         nn_model=nn,
         callbacks=[logger, model_checkpoint],
@@ -122,14 +132,18 @@ class CustomLogger(Callback):
     """
     A Keras callback logging additional metrics after every epoch
     """
-    def __init__(self, nn_type, verbose=True):
+    def __init__(self, nn_type, labels, ontology, verbose=True):
         super(CustomLogger, self).__init__()
+        self.labels = labels
+        self.ontology = ontology
         self.map_list = []
         self.ndcg_list = []
         self.mrr_list = []
         self.r_prec_list = []
         self.p_at_3_list = []
         self.p_at_5_list = []
+        self.hier_desc_list = []
+        self.hier_anc_list = []
         self.verbose = verbose
         self.nn_type = nn_type
         self.log_dir = self.create_log_dir()
@@ -167,7 +181,12 @@ class CustomLogger(Callback):
         else:
             x_test, y_test = test_data[:-2], test_data[-2]
 
+        y_test = np.asarray(y_test == 1)
         y_pred = self.model.predict(x_test)
+
+        hier_desc = descendant_pr_auc(y_test, y_pred, self.labels, self.ontology)
+        hier_anc = ancestor_pr_auc(y_test, y_pred, self.labels, self.ontology)
+
         y_pred = np.fliplr(y_pred.argsort())
         for i in xrange(len(y_test)):
             y_pred[i] = y_test[i][y_pred[i]]
@@ -187,6 +206,8 @@ class CustomLogger(Callback):
         self.r_prec_list.append(r_prec)
         self.p_at_3_list.append(p_at_3)
         self.p_at_5_list.append(p_at_5)
+        self.hier_desc_list.append(hier_desc)
+        self.hier_anc_list.append(hier_anc)
 
         log_dictionary = {
             'map': map,
@@ -196,7 +217,9 @@ class CustomLogger(Callback):
             'precision@3': p_at_3,
             'precision@5': p_at_5,
             'val_acc': val_acc,
-            'val_loss': val_loss
+            'val_loss': val_loss,
+            'hier_desc': hier_desc,
+            'hier_anc': hier_anc,
         }
 
         for metric_name, metric_value in log_dictionary.iteritems():
