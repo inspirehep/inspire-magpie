@@ -8,7 +8,7 @@ from inspire_magpie.config import DATA_DIR, KEYWORD_SCALER, KEYWORD_WORD2VEC, \
     CATEGORY_SCALER, CATEGORY_WORD2VEC, EXPERIMENT_SCALER, EXPERIMENT_WORD2VEC
 from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
-from magpie.nn.models import berger_cnn
+from magpie.nn.models import cnn
 from magpie.utils import load_from_disk
 
 app = Flask('magpie')
@@ -31,15 +31,15 @@ def get_cached_model(corpus):
 def build_model_for_corpus(corpus):
     """ Build an appropriate Keras NN model depending on the corpus """
     if corpus == 'keywords':
-        keras_model = berger_cnn(embedding_size=100, output_length=10000)
+        keras_model = cnn(embedding_size=100, output_length=10000)
         w2v_path = KEYWORD_WORD2VEC
         scaler_path = KEYWORD_SCALER
     elif corpus == 'categories':
-        keras_model = berger_cnn(embedding_size=50, output_length=14)
+        keras_model = cnn(embedding_size=50, output_length=14)
         w2v_path = CATEGORY_WORD2VEC
         scaler_path = CATEGORY_SCALER
     elif corpus == 'experiments':
-        keras_model = berger_cnn(embedding_size=100, output_length=500)
+        keras_model = cnn(embedding_size=100, output_length=500)
         w2v_path = EXPERIMENT_WORD2VEC
         scaler_path = EXPERIMENT_SCALER
     else:
