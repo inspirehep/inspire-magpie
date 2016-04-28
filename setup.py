@@ -74,6 +74,7 @@ setup(
         'magpie',
         'flask',
         'gensim',
+        'h5py',
     ],
 
     # List additional groups of dependencies here (e.g. development
