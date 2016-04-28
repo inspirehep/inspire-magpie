@@ -24,10 +24,10 @@ There is also a [web interface](https://github.com/eamonnmag/magpie_web) that ca
 For the training, you can use two functions that the [API](https://github.com/inspirehep/inspire-magpie/blob/master/inspire_magpie/api.py) provides: `train()` and `batch_train()`. The latter performs out-of-core training, but both of them take the same parameters:
 ```
 $ from inspire_magpie.api import batch_train
-$ batch_train('/path/to/the/training/set', test_dir='if/you/have/a/test/set', nn='berger_cnn', nb_epochs=5, batch_size=64, persist=True, no_of_labels=10000, verbose=1)
+$ batch_train('/path/to/the/training/set', test_dir='if/you/have/a/test/set', nn='cnn', nb_epochs=5, batch_size=64, persist=True, no_of_labels=10000, verbose=1)
 ```
  - `test_dir` - is the path to the test set (optional)
- - `nn` - defines the NN model to use for training. Currently supported: `berger_cnn` and `berger_rnn`
+ - `nn` - defines the NN model to use for training. Currently supported: `cnn` and `rnn`
  - `nb_epochs` - how many times should we feed the training set to the NN
  - `batch_size` - size of the batch with which the training occurs
  - `persist` - whether to save to disk the final model after training (in the log directory)

@@ -15,7 +15,7 @@ from magpie.evaluation.rank_metrics import mean_reciprocal_rank, r_precision, \
 from magpie.utils import load_from_disk
 
 
-def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
+def batch_train(train_dir, test_dir=None, nn='cnn', nb_epochs=NB_EPOCHS,
                 batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
                 verbose=1):
     model = MagpieModel(
@@ -45,7 +45,7 @@ def batch_train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
     return history, model
 
 
-def train(train_dir, test_dir=None, nn='berger_cnn', nb_epochs=NB_EPOCHS,
+def train(train_dir, test_dir=None, nn='cnn', nb_epochs=NB_EPOCHS,
           batch_size=BATCH_SIZE, persist=False, no_of_labels=NO_OF_LABELS,
           verbose=1):
     model = MagpieModel(

@@ -7,7 +7,7 @@ from gensim.models import Word2Vec
 from inspire_magpie.config import DATA_DIR, WORD2VEC_PATH, SCALER_PATH
 from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
-from magpie.nn.models import berger_cnn
+from magpie.nn.models import cnn
 from magpie.utils import load_from_disk
 
 app = Flask('magpie')
@@ -30,11 +30,11 @@ def get_cached_model(corpus):
 def build_model_for_corpus(corpus):
     """ Build an appropriate Keras NN model depending on the corpus """
     if corpus == 'keywords':
-        keras_model = berger_cnn(embedding_size=100, output_length=10000)
+        keras_model = cnn(embedding_size=100, output_length=10000)
     elif corpus == 'categories':
-        keras_model = berger_cnn(embedding_size=100, output_length=14)
+        keras_model = cnn(embedding_size=100, output_length=14)
     elif corpus == 'experiments':
-        keras_model = berger_cnn(embedding_size=100, output_length=500)
+        keras_model = cnn(embedding_size=100, output_length=500)
     else:
         raise ValueError('The corpus is not valid')
 
