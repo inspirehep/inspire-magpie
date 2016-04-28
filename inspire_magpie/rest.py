@@ -125,15 +125,14 @@ def word2vec():
     w2v_model = get_cached_model(corpus).word2vec_model
 
     for word in positive + negative:
-        if word not in w2v_model[corpus]:
+        if word not in w2v_model:
             return jsonify({'status_code': 404, 'similar_words': None,
                             'info': '{0} does not have a representation in the '
                                     '{1} corpus'.format(word, corpus)})
 
     return jsonify({
         'status_code': 200,
-        'vector': w2v_model[corpus].most_similar(positive=positive,
-                                                 negative=negative)
+        'vector': w2v_model.most_similar(positive=positive, negative=negative)
     })
 
 
