@@ -1,0 +1,5 @@
+include *.md
+include LICENSE
+recursive-include data *.gensim
+recursive-include data *.npy
+recursive-include data *.pickle
