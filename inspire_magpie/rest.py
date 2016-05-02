@@ -1,3 +1,4 @@
+import logging
 import os
 import time
 
@@ -200,4 +201,4 @@ def feedback():
 
 
 if __name__ == "__main__":
-    app.run(port=5051, debug=True)
+    app.run(port=5051)
