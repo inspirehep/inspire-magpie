@@ -1,0 +1,34 @@
+<div align="left">
+    <div id="progress-view" class="hidden">
+        <div class="spinner">
+            <div class="bounce1"></div>
+            <div class="bounce2"></div>
+            <div class="bounce3"></div>
+        </div>
+    </div>
+    <div id="form-view">
+        <p>Place the abstract for the publication in the area below.</p>
+
+        <form method="POST" class="form-horizontal" action=".">
+
+            <div class="form-group">
+                <label>Operation</label>
+                <select name="corpus" class="form-control">
+    		    <option value="keywords" selected>Extract Keywords</option>
+                    <option value="categories">Extract Subject Classification</option>
+		    <option value="experiments">Extract Experiments</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Paper Abstract</label>
+                <textarea class="form-control extraction-text" name="text"></textarea>
+            </div>
+
+            <div align="center">
+                <input type="submit" class="btn btn-lg btn-success btn-extract-keywords" value="Extract"
+                       onclick="document.getElementById('progress-view').className = ''; document.getElementById('form-view').className = 'hidden'; return true;"/>
+            </div>
+        </form>
+    </div>
+</div>

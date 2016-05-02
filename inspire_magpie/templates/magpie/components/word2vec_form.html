@@ -1,0 +1,17 @@
+<form method="POST" class="form-horizontal text-left" align="left" action="/word2vec">
+    <a href="/">
+        <input type="hidden" name="domain" value="hep"/>
+    </a>
+    <div class="form-group">
+        <label>Positive words</label>
+        <input name="positive" class="positive form-control" placeholder="Positively enhanced words"/>
+    </div>
+    <div class="form-group">
+        <label>Negative words</label>
+        <input name="negative" class="negative form-control" placeholder="Negatively enhanced words"/>
+    </div>
+
+    <div align="center">
+        <input type="submit" class="btn btn-lg btn-success btn-extract-keywords" value="Get Associated Words"/>
+    </div>
+</form>

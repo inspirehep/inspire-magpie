@@ -1,0 +1,68 @@
+{% extends "magpie/base.html" %}
+{%- block content -%}
+    <div class="form-container" align="center">
+        <a href="/">
+            <div class="logo"></div>
+        </a>
+
+        {% if ctx.type == 'word2vec' %}
+            <p>Words
+                {% if ctx.positive and ctx.negative %}most associated with
+                    <span class="positive">{{ ctx.positive }}</span> and least with
+                    <span class="negative">{{ ctx.negative }}</span>
+                {% elif ctx.positive %}
+                    most associated with <span class="positive">{{ ctx.positive }}</span>
+                {% else %}
+                    associated least with <span class="negative">{{ ctx.negative }}</span>
+                {% endif %}
+            </p>
+            <ol>
+                {% for result in results.vector %}
+                    <li>{{ result[0] }}</li>
+                {% endfor %}
+            </ol>
+        {% else %}
+            <div class="abstract">
+                {{ ctx.abstract }}
+            </div>
+            <form action="/extract-feedback" method="POST">
+                <input type="hidden" name="abstract_text" value="{{ ctx.abstract }}">
+                <div class="results-list">
+                    <p>Detected {% if ctx.corpus == 'hep-keywords' %}Keywords{% else %}Subject Areas{% endif %} <br/><span
+                            class="small-text">you can feedback incorrect keywords to our model</span>.</p>
+
+                    {% for result in results.labels %}
+                        <div class="row-fluid" align="left">
+                            <div class="col-md-6">
+                                {{ result[0] }}
+                            </div>
+
+                            <div class="col-md-3">
+                                {{ result[1] }}
+                            </div>
+
+                            <div class="col-md-3" align="right">
+                                <div class="onoffswitch">
+                                    <input type="checkbox" name="{{ result[0] }}" class="onoffswitch-checkbox"
+                                           id="myonoffswitch-{{ loop.index }}" {% if result[1] > 0.25 %}checked{% endif %}>
+                                    <label class="onoffswitch-label" for="myonoffswitch-{{ loop.index }}"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+
+                    {% endfor %}
+                </div>
+                <div class="clearfix"></div>
+                {% if ctx.corpus %}
+                    <input type="submit" class="btn btn-lg btn-primary btn-extract-keywords"
+                           value="Confirm {% if ctx.corpus == 'hep-keywords' %} Keywords {% else %} Subject Areas{% endif %}">
+                {% endif %}
+
+            </form>
+        {% endif %}
+    </div>
+    <div align="center" class="links">
+        <a href="/{% if ctx.type == 'word2vec' %}word2vec{% endif %}">back</a>
+    </div>
+{%- endblock -%}
