@@ -141,7 +141,7 @@ class CustomLogger(Callback):
             y_test = test_data['output']
             x_test = {'input': test_data['input']}
         else:
-            x_test, y_test = test_data[:-2], test_data[-2]
+            x_test, y_test = test_data[:-2], test_data[-2][0]
 
         y_pred = self.model.predict(x_test)
         y_pred = np.fliplr(y_pred.argsort())
