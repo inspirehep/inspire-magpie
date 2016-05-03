@@ -1,4 +1,13 @@
-# inspire-magpie
+<!---
+  This file is part of Inspire-Magpie.
+  Copyright (c) 2016 CERN
+
+  Inspire-Magpie is a free software; you can redistribute it and/or modify it
+  under the terms of the MIT License; see LICENSE file for
+  more details.
+-->
+
+# Inspire-Magpie
 
 A wrapper around [magpie](https://github.com/inspirehep/magpie) for Inspire that provides trained models and functions to learn from the High Energy Physics corpus.
 
@@ -16,6 +25,7 @@ $ pip install .
 
 # Usage
 There exists a UI and REST API based on [Flask](http://flask.pocoo.org/) that you can run with:
+
 ```shell
 $ python wsgi.py
 ```

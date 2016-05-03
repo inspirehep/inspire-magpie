@@ -1,3 +1,21 @@
+# -*- coding: utf-8 -*-
+#
+# This file is part of Inspire-Magpie.
+# Copyright (c) 2016 CERN
+#
+# Inspire-Magpie is a free software; you can redistribute it and/or modify it
+# under the terms of the MIT License; see LICENSE file for
+# more details.
+
+"""UI Blueprint.
+
+.. codeauthor:: Eamonn Maguire <eamonnmag@gmail.com>
+.. codeauthor:: Jan Stypka <jan.stypka@cern.ch>
+.. codeauthor:: Jan Aage Lavik <jan.age.lavik@cern.ch>
+"""
+
+from __future__ import absolute_import, print_function
+
 from flask import Blueprint, render_template, redirect, request, url_for
 
 from .api import get_word_vector, predict_labels
@@ -27,7 +45,6 @@ def extractor():
 
 @blueprint.route('/extract-feedback', methods=['POST'])
 def extract_feedback():
-    print request.form
     text = request.form.get('text', '')
 
     return redirect('/thanks')
