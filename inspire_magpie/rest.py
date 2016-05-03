@@ -1,76 +1,23 @@
-import logging
 import os
 import time
 
-from flask import Flask, request, jsonify
-from gensim.models import Word2Vec
+from flask import Blueprint, request, jsonify
 
-from inspire_magpie.config import DATA_DIR, WORD2VEC_PATH, SCALER_PATH
-from inspire_magpie.labels import get_labels
-from magpie import MagpieModel
-from magpie.nn.models import cnn
-from magpie.utils import load_from_disk
+from .api import get_word_vector, predict_labels
+from .errors import WordDoesNotExist
+from .config import SUPPORTED_CORPORA
 
-app = Flask('magpie')
-
-models = dict()
-
-supported_corpora = ['keywords', 'categories', 'experiments']
+blueprint = Blueprint('rest', __name__, url_prefix="/api")
 
 
-def get_cached_model(corpus):
-    """ Get the cached Keras NN model or rebuild it if missed. """
-    global models
-
-    if corpus not in models:
-        models[corpus] = build_model_for_corpus(corpus)
-
-    return models[corpus]
-
-
-def build_model_for_corpus(corpus):
-    """ Build an appropriate Keras NN model depending on the corpus """
-    if corpus == 'keywords':
-        keras_model = cnn(embedding_size=100, output_length=10000)
-    elif corpus == 'categories':
-        keras_model = cnn(embedding_size=100, output_length=14)
-    elif corpus == 'experiments':
-        keras_model = cnn(embedding_size=100, output_length=500)
-    else:
-        raise ValueError('The corpus is not valid')
-
-    model_path = os.path.join(DATA_DIR, corpus, 'model.pickle')
-    keras_model.load_weights(model_path)
-
-    w2v_model = Word2Vec.load(WORD2VEC_PATH)
-    scaler = load_from_disk(SCALER_PATH)
-    labels = get_labels(keras_model.output_shape[1])
-
-    model = MagpieModel(
-        keras_model=keras_model,
-        word2vec_model=w2v_model,
-        scaler=scaler,
-        labels=labels,
-    )
-
-    return model
-
-
-@app.route('/')
-@app.route('/hello')
-def hello():
-    """ Function for testing purposes """
-    return 'Hello World!'
-
-
-@app.route("/predict", methods=['POST'])
+@blueprint.route("/predict", methods=['POST'])
 def predict():
     """
     Takes a following JSON as input:
     {
         'text': 'my abstract'       # the text to be fed to the model
         'corpus': 'keywords'        # corpus to work on. Currently supported are
-                                    # in the supported_corpora variable
+                                    # in the SUPPORTED_CORPORA variable
     }
 
     :return:
@@ -85,13 +32,12 @@ def predict():
     if not json or 'text' not in json:
         return jsonify({'status_code': 400, 'keywords': []})
 
-    corpus = json.get('corpus', supported_corpora[0])
-    if corpus not in supported_corpora:
+    corpus = json.get('corpus', SUPPORTED_CORPORA[0])
+    if corpus not in SUPPORTED_CORPORA:
         return jsonify({'status_code': 404, 'keywords': [],
                         'info': 'Corpus ' + corpus + ' is not available'})
 
-    model = get_cached_model(corpus)
-    labels = model.predict_from_text(json['text'])
+    labels = predict_labels(corpus, json['text'])
 
     return jsonify({
         'status_code': 200,
@@ -99,13 +45,13 @@ def predict():
     })
 
 
-@app.route("/word2vec", methods=['POST'])
+@blueprint.route("/word2vec", methods=['POST'])
 def word2vec():
     """
     Takes a following JSON as input:
     {
         'corpus': 'keywords'            # corpus to work on. Currently supported
-                                        # are in the supported_corpora variable
+                                        # are in the SUPPORTED_CORPORA variable
         'positive': ['cern', 'geneva']  # words to add
         'negative': ['heidelberg']      # words to subtract
     }
@@ -123,27 +69,24 @@ def word2vec():
 
     positive, negative = json.get('positive', []), json.get('negative', [])
     corpus = json['corpus']
-    w2v_model = get_cached_model(corpus).word2vec_model
-
-    for word in positive + negative:
-        if word not in w2v_model:
-            return jsonify({'status_code': 404, 'similar_words': None,
-                            'info': '{0} does not have a representation in the '
-                                    '{1} corpus'.format(word, corpus)})
-
+    try:
+        vector = get_word_vector(corpus, positive, negative)
+    except WordDoesNotExist as err:
+        return jsonify({'status_code': 404, 'similar_words': None,
+                        'info': err})
     return jsonify({
         'status_code': 200,
-        'vector': w2v_model.most_similar(positive=positive, negative=negative)
+        'vector': vector
     })
 
 
-@app.route("/feedback", methods=['POST'])
+@blueprint.route("/feedback", methods=['POST'])
 def feedback():
     """
     Takes a following JSON as input:
     {
         'corpus': 'keywords',       # corpus to work on. Currently supported
-                                    # are in the supported_corpora variable
+                                    # are in the SUPPORTED_CORPORA variable
         'text': 'my abstract',      # the text that the labels describe
         'labels': []                # list of two-element tuples each with a label
                                     # and a binary value e.g. [('jan', 1)]
@@ -165,8 +108,8 @@ def feedback():
         if type(json['labels']) != list or len(elem) != 2:
             return jsonify({'status_code': 400, 'info': 'Error in labels field'})
 
-    corpus = json.get('corpus', supported_corpora[0])
-    if corpus not in supported_corpora:
+    corpus = json.get('corpus', SUPPORTED_CORPORA[0])
+    if corpus not in SUPPORTED_CORPORA:
         return jsonify({'status_code': 404,
                         'info': 'Corpus ' + corpus + ' is not available'})
 
@@ -198,7 +141,3 @@ def feedback():
             f.write(format_line(lab))
 
     return jsonify({'status_code': 200})
-
-
-if __name__ == "__main__":
-    app.run(port=5051)

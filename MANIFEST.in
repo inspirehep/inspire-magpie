@@ -3,3 +3,7 @@ include LICENSE
 recursive-include data *.gensim
 recursive-include data *.npy
 recursive-include data *.pickle
+recursive-include inspire_magpie *.css
+recursive-include inspire_magpie *.html
+recursive-include inspire_magpie *.js
+recursive-include inspire_magpie *.svg

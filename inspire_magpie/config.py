@@ -11,3 +11,5 @@ WORD2VEC_PATH = os.path.join(DATA_DIR, 'word2vec.gensim')
 SCALER_PATH = os.path.join(DATA_DIR, 'scaler.pickle')
 
 NO_OF_LABELS = 10000
+
+SUPPORTED_CORPORA = ['keywords', 'categories', 'experiments']

@@ -6,13 +6,81 @@ import time
 from gensim.models import Word2Vec
 from keras.callbacks import Callback, ModelCheckpoint
 
-from inspire_magpie.config import LOG_FOLDER, NO_OF_LABELS, WORD2VEC_PATH, SCALER_PATH
-from inspire_magpie.labels import get_labels
 from magpie import MagpieModel
 from magpie.config import NB_EPOCHS, BATCH_SIZE
 from magpie.evaluation.rank_metrics import mean_reciprocal_rank, r_precision, \
     mean_average_precision, ndcg_at_k, precision_at_k
 from magpie.utils import load_from_disk
+from magpie.nn.models import cnn
+
+from .config import (
+    DATA_DIR,
+    LOG_FOLDER,
+    NO_OF_LABELS,
+    WORD2VEC_PATH,
+    SCALER_PATH,
+)
+from .labels import get_labels
+from .errors import WordDoesNotExist
+
+models = dict()
+
+
+def get_cached_model(corpus):
+    """ Get the cached Keras NN model or rebuild it if missed. """
+    global models
+
+    if corpus not in models:
+        models[corpus] = build_model_for_corpus(corpus)
+
+    return models[corpus]
+
+
+def build_model_for_corpus(corpus):
+    """ Build an appropriate Keras NN model depending on the corpus """
+    if corpus == 'keywords':
+        keras_model = cnn(embedding_size=100, output_length=10000)
+    elif corpus == 'categories':
+        keras_model = cnn(embedding_size=100, output_length=14)
+    elif corpus == 'experiments':
+        keras_model = cnn(embedding_size=100, output_length=500)
+    else:
+        raise ValueError('The corpus is not valid')
+
+    model_path = os.path.join(DATA_DIR, corpus, 'model.pickle')
+    keras_model.load_weights(model_path)
+
+    w2v_model = Word2Vec.load(WORD2VEC_PATH)
+    scaler = load_from_disk(SCALER_PATH)
+    labels = get_labels(keras_model.output_shape[1])
+
+    model = MagpieModel(
+        keras_model=keras_model,
+        word2vec_model=w2v_model,
+        scaler=scaler,
+        labels=labels,
+    )
+
+    return model
+
+
+def get_word_vector(corpus, positive, negative):
+    """Get word vector for positive/negative terms for corpus."""
+    w2v_model = get_cached_model(corpus).word2vec_model
+
+    # Check that words exist
+    for word in positive + negative:
+        if word not in w2v_model:
+            raise WordDoesNotExist("{0} does not have a representation "
+                                   "in the {1} corpus".format(word, corpus))
+
+    return w2v_model.most_similar(positive=positive, negative=negative)
+
+
+def predict_labels(corpus, text):
+    """Predict labels from text for corpus."""
+    model = get_cached_model(corpus)
+    return model.predict_from_text(text)
 
 
 def batch_train(train_dir, test_dir=None, nn='cnn', nb_epochs=NB_EPOCHS,

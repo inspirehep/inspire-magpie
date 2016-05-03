@@ -1,3 +1,5 @@
+import logging
+
 from inspire_magpie import application
 
 # Enable logging for wsgi server
@@ -9,4 +11,4 @@ if not application.debug:
     wsgi_logger.addHandler(stream_handler)
 
 if __name__ == "__main__":
-    application.run(port=5051)
+    application.run(host="0.0.0.0", port=5051, debug=True)

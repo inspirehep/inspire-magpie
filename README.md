@@ -15,11 +15,18 @@ $ pip install .
  - [magpie](https://github.com/inspirehep/magpie) (and all that comes with it)
 
 # Usage
-There exists a REST API based on [Flask](http://flask.pocoo.org/) that you can run with:
+There exists a UI and REST API based on [Flask](http://flask.pocoo.org/) that you can run with:
+```shell
+$ python wsgi.py
 ```
-$ python rest.py
+
+Access the UI on http://localhost:5051 and the REST interface under http://localhost:5051/api.
+
+## REST Example
+
+```shell
+$ curl -i -X POST -H 'Content-Type: application/json' -d '{"corpus": "keywords", "positive": ["lhc"]}' http://localhost:5051/api/word2vec
 ```
-There is also a [web interface](https://github.com/eamonnmag/magpie_web) that can talk to it.
 
 For the training, you can use two functions that the [API](https://github.com/inspirehep/inspire-magpie/blob/master/inspire_magpie/api.py) provides: `train()` and `batch_train()`. The latter performs out-of-core training, but both of them take the same parameters:
 ```
