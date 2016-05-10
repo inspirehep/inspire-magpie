@@ -43,21 +43,20 @@ def extractor():
 
     return render_template('magpie/extractor.html')
 
+
 @blueprint.route('/extract-feedback', methods=['POST'])
 def extract_feedback():
-    text = request.form.get('text', '')
-
     return redirect('/thanks')
 
 
 @blueprint.route('/word2vec', methods=['POST', 'GET'])
 def word2vec():
     if request.method == 'POST':
-        positive = request.form.get('positive', None)
-        negative = request.form.get('negative', None)
+        positive = request.form.get('positive', '')
+        negative = request.form.get('negative', '')
 
-        positive = [w.strip() for w in positive.split(',')]
-        negative = [w.strip() for w in negative.split(',')]
+        positive = [w.strip().lower() for w in positive.split(',') if w != '']
+        negative = [w.strip().lower() for w in negative.split(',') if w != '']
 
         ctx = {'type': 'word2vec'}
         if positive:
@@ -70,6 +69,7 @@ def word2vec():
         return render_template('magpie/results.html', results=vector, ctx=ctx)
     else:
         return render_template('magpie/word2vec.html')
+
 
 @blueprint.route('/thanks', methods=['GET'])
 def thanks():

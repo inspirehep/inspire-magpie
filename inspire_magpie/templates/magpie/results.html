@@ -37,10 +37,16 @@
             <form action="/extract-feedback" method="POST">
                 <input type="hidden" name="abstract_text" value="{{ ctx.abstract }}">
                 <div class="results-list">
-                    <p>Detected {% if ctx.corpus == 'hep-keywords' %}Keywords{% else %}Subject Areas{% endif %} <br/><span
-                            class="small-text">you can feedback incorrect keywords to our model</span>.</p>
+                    <p>Detected {% if ctx.corpus == 'keywords' %}
+                        Keywords
+                        {% elif ctx.corpus == 'categories' %}
+                        Subject Areas
+                        {% else %}
+                        Experiments
+                        {% endif %} <br/><span
+                            class="small-text">you can feedback incorrect labels to our model</span>.</p>
 
-                    {% for result in results.labels %}
+                    {% for result in results %}
                         <div class="row-fluid" align="left">
                             <div class="col-md-6">
                                 {{ result[0] }}
@@ -65,7 +71,7 @@
                 <div class="clearfix"></div>
                 {% if ctx.corpus %}
                     <input type="submit" class="btn btn-lg btn-primary btn-extract-keywords"
-                           value="Confirm {% if ctx.corpus == 'hep-keywords' %} Keywords {% else %} Subject Areas{% endif %}">
+                           value="Confirm {{ ctx.corpus }} ">
                 {% endif %}
 
             </form>
